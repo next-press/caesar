@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+BIN_FILE_PATH=$(readlink -f $0)
+LIB_PATH="$(dirname $BIN_FILE_PATH)"
+CWD_PATH="$PWD"
+
+HOST_SCRIPTS_PATH="${LIB_PATH}/scripts/host/"
+CONTAINER_SCRIPTS_PATH="${LIB_PATH}/scripts/container/"
+
+LIB_PATH="${LIB_PATH}" CWD_PATH="${CWD_PATH}" bash "${HOST_SCRIPTS_PATH}${1}.sh" "${@:2}"

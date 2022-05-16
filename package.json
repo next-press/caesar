@@ -1,0 +1,24 @@
+{
+  "name": "caesar",
+  "version": "0.0.1",
+  "description": "NextPress docker-based development environment",
+  "main": "index.js",
+  "bin": "caesar",
+  "scripts": {
+    "up": ".docker/scripts/host/up.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/next-press/caesar.git"
+  },
+  "keywords": [
+    "docker",
+    "wordpress"
+  ],
+  "author": "Arindo Duque <arindo@nextpress.co>",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/next-press/caesar/issues"
+  },
+  "homepage": "https://github.com/next-press/caesar#readme"
+}
