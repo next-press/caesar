@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const { exit } = require('process');
+const slugify = require('slugify');
+
+const hostsContent = fs.readFileSync('/etc/hosts');
+
+const domain = process.argv[2];
+
+if (!domain) {
+
+  exit(1)
+
+}
+
+let slug = slugify(process.argv[2], {
+  replacement: '-',  // replace spaces with replacement character, defaults to `-`
+  // remove: /\.([a-z])+/, // remove characters that match regex, defaults to `undefined`
+  lower: true,      // convert to lower case, defaults to `false`
+});
+
+slug = slug.replace(/\./g, '-');
+
+const ceasarBlock = `
+# ${ slug } - Added by Ceasar
+127.0.0.1 ${ domain }
+127.0.0.1 template.${ domain }
+127.0.0.1 test.${ domain }
+127.0.0.1 teste.${ domain }
+127.0.0.1 pma.${ domain }
+127.0.0.1 customer.${ domain }
+# End - ${ slug } - Added by Ceasar`;
+
+const newContent = hostsContent.toString().replace(new RegExp(`# ${ slug } - Added by Ceasar\s([\S\s]+)\s# End - ${ slug } - Added by Ceasar`, 'gm'), '') + ceasarBlock;
+
+fs.writeFileSync('/etc/hosts', newContent);
+
+exit(0);

@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+const slugify = require('slugify');
+
+let slug = slugify(process.argv[2], {
+  replacement: '-',  // replace spaces with replacement character, defaults to `-`
+  // remove: /\.([a-z])+/, // remove characters that match regex, defaults to `undefined`
+  lower: true,      // convert to lower case, defaults to `false`
+});
+
+slug = slug.replace(/\./g, '-');
+
+console.log(slug);

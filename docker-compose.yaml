@@ -1,29 +1,54 @@
 version: "3.9"
+
+networks:
+  caesar_supervisor:
+    external: true
+    name: caesar_supervisor
+  caesar_site:
+    external: true
+    name: caesar_${SLUG}
+
 services:
   db:
     image: yobasystems/alpine-mariadb
-    container_name: db
+    container_name: caesar-${SLUG}-db
     volumes:
-      - $CWD_PATH/volumes/db:/var/lib/mysql
+      - ~/.caesar/db/${SLUG}:/var/lib/mysql
     restart: always
+    networks:
+      - caesar_supervisor
+      - caesar_site
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wp
       MYSQL_USER: wp
       MYSQL_PASSWORD: wp
   wordpress:
-    container_name: wordpress
+    container_name: caesar-${SLUG}-wordpress
     depends_on:
-      - db
-    image: wordpress:latest
+      - caesar-${SLUG}-db
+      - caesar-${SLUG}-cert
+    build:
+      context: ./images/wordpress
+    networks:
+      - caesar_supervisor
+      - caesar_site
+    # image: wordpress:latest
     volumes:
       - $CWD_PATH/wp:/var/www/html
-      - $LIB_PATH/mu-plugins/autoloader.php:/var/www/html/wp-content/mu-plugins/autoloader.php
+      - $LIB_PATH/mu-plugins/autoloader.php:/var/www/html/wp-content/mu-plugins/autoloader.php:ro
       - $LIB_PATH/scripts/container:/scripts
-      - $CWD_PATH/wp-content:/var/www/html/wp-content
+      - $LIB_PATH/.htaccess:/var/www/html/.htaccess
+      - $CWD_PATH/wp-content/plugins:/var/www/html/wp-content/plugins
+      - $CWD_PATH/wp-content/themes:/var/www/html/wp-content/themes
+      - $CWD_PATH/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins/files
+      # Out Products
       - $CWD_PATH/wp-ultimo:/var/www/html/wp-content/plugins/wp-ultimo
-    ports:
-      - "8000:80"
+      # - $CWD_PATH/wp-admin-pages-pro:/var/www/html/wp-content/plugins/wp-admin-pages-pro
+      # - $CWD_PATH/material-wp:/var/www/html/wp-content/plugins/material-wp
+      # - $CWD_PATH/pro-theme:/var/www/html/wp-content/plugins/pro-theme
+    # ports:
+    #   - "8000:80"
     # restart: never
     environment:
       WORDPRESS_DB_HOST: db
@@ -45,27 +70,30 @@ services:
   #     VIRTUAL_PORT: 85
   #   depends_on:
   #    - db
-  nginx-proxy:
-    image: nginxproxy/nginx-proxy:alpine
-    container_name: nginx-proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - $CWD_PATH/certs:/etc/nginx/certs
-    depends_on:
-     - db
-     - wordpress
-     - mkcert
+  # nginx-proxy:
+  #   image: nginxproxy/nginx-proxy:alpine
+  #   container_name: nginx-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - ~/.ceasar/certs:/etc/nginx/certs
+  #   depends_on:
+  #    - db
+  #    - wordpress
+  #    - mkcert
   mkcert:
+    container_name: caesar-${SLUG}-cert
+    networks:
+      - caesar_supervisor
+      - caesar_site
+    build:
+      context: ./images/mkcert
     environment:
       DOMAIN: $DOMAIN_NAME
-    container_name: mkcert
     volumes:
-      - $CWD_PATH/certs:/certs
-    build:
-      context: .
+      - ~/.caesar/certs:/certs
 volumes:
   wp: {}
   db: {}

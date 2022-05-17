@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-set -x
-
-# Check if network exists
-docker network ls | grep caesar
+# set -x
 
 # Create the main network
-docker network create -d bridge caesar_supervisor
+docker network ls | grep -q caesar_supervisor || docker network create -d bridge caesar_supervisor
