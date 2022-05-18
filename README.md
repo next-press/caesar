@@ -18,8 +18,6 @@ As of now, this tool only supports macOS (it should support Linux as well, but t
 
 ## Installing
 
-*Note: You don't need to install it to use it, you can simply use `npx @next-press/caesar <command>`.*
-
 To install it, run:
 ```
 npm install -g @next-press/caesar
