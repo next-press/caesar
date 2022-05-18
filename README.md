@@ -93,3 +93,4 @@ Caesar installs and activated Query Monitor by default, and installs Debug Bar S
 - [ ] Container reset via `caesar reset`, to restore install to a fresh install
 - [ ] Auto-clone NextPress repositories and mount the folders into the plugins folder
 - [ ] Move plugins to install to external config file
+- [ ] Native support to Cloudflare tunnels for payment gateway testing
