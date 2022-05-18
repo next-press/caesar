@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+const randomWords = require('random-words');
+
+const number = parseInt(process.argv[2] ?? 3, 10);
+
+const extension = process.argv[3] ?? '.dev';
+
+const domains = [];
+
+for (let i = 0; i < number; i++) {
+
+  const domain = randomWords({ exactly: 2, join: '-' }) + extension;
+  
+  domains.push(domain);
+  
+}
+
+console.log(domains.join(','));

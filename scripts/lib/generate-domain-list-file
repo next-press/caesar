@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+const content = `#------------------------------------
+# Site Domain Names
+#
+# The domains below are available and should
+# point to the right site. They should also
+# be covered under the SSL cert created.
+#
+# - ${ process.env.DOMAIN_NAME }
+# - template.${ process.env.DOMAIN_NAME }
+# - test.${ process.env.DOMAIN_NAME }
+# - teste.${ process.env.DOMAIN_NAME }
+# - pma.${ process.env.DOMAIN_NAME }
+# - customer.${ process.env.DOMAIN_NAME }
+#
+# For mapped domains, you have can use the
+# options below:
+#
+# - ${ process.env.MAPPED_DOMAIN_NAMES.split(',').join("\n# - ") }
+#
+# These are generated dynamically on the first
+# \`caesar up\` run and saved here as a env variable.
+#
+# You can manually re-generate them by removing the
+# MAPPED_DOMAIN_NAMES variable below and re-running 
+# the up command.
+#------------------------------------
+MAPPED_DOMAIN_NAMES=${ process.env.MAPPED_DOMAIN_NAMES }`;
+
+console.log(content);

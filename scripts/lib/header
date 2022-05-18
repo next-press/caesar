@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+const welcome = require('cli-welcome');
+const _ = require('lodash');
+const package = require('../../package.json');
+
+const generateHeader = function () {
+
+  let header = [];
+
+  const welcome = require('cli-welcome');
+
+  const oldCL = console.log;
+
+  header.push(process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H');
+
+  console.log = text => {
+
+    header.push(text);
+
+  };
+
+  // OR with all the options set like this:
+  welcome({
+    title: `Caesar - Docker Development Environment`,
+    tagLine: `by NextPress`,
+    bgColor: `#FADC00`,
+    color: `#000000`,
+    bold: false,
+    clear: false,
+    version: `${package.version}`
+  });
+
+  console.log = oldCL;
+
+  header = _.filter(header);
+
+  return header.join('');
+
+}
+
+console.log(generateHeader());

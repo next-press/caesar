@@ -7,7 +7,11 @@ const key = process.argv[3];
 
 const value = process.argv[4];
 
-const content = `${ key }=${ value }
-` + fs.readFileSync(file).toString().replace(new RegExp(`${ key }=(.*)`, 'g'), '');
+let content = `${key}=${value}`
+
+if (fs.existsSync(file)) {
+
+  content += "\n" + fs.readFileSync(file).toString().replace(new RegExp(`${ key }=(.*)`, 'g'), '');
+}
 
 fs.writeFileSync(file, content.replace(/^\s*\n/gm, ''));

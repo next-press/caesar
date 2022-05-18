@@ -5,8 +5,14 @@
       "name": "Listen for XDebug",
       "type": "php",
       "request": "launch",
-      "port": 9000,
-      "log": true
+      "port": 9003,
+      "log": true,
+      "stopOnEntry": true,
+      "pathMappings": {
+        "/var/www/html": "${workspaceRoot}/wp",
+        "/var/www/html/wp-content": "${workspaceRoot}/wp-content",
+        "/var/www/html/wp-content/plugins/wp-ultimo": "${workspaceRoot}/wp-ultimo",
+      }
     }
   ]
 }

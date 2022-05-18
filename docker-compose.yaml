@@ -9,6 +9,10 @@ networks:
     name: caesar_${SLUG}
 
 services:
+  # ---------------
+  # MariaDB for the site install
+  # - THe Database
+  # ---------------
   db:
     image: yobasystems/alpine-mariadb
     container_name: caesar-${SLUG}-db
@@ -23,7 +27,12 @@ services:
       MYSQL_DATABASE: wp
       MYSQL_USER: wp
       MYSQL_PASSWORD: wp
+  # ---------------
+  # WordPress Container
+  # - WP Core
+  # ---------------
   wordpress:
+    # image: wordpress:latest
     container_name: caesar-${SLUG}-wordpress
     depends_on:
       - caesar-${SLUG}-db
@@ -33,56 +42,36 @@ services:
     networks:
       - caesar_supervisor
       - caesar_site
-    # image: wordpress:latest
     volumes:
       - $CWD_PATH/wp:/var/www/html
       - $LIB_PATH/mu-plugins/autoloader.php:/var/www/html/wp-content/mu-plugins/autoloader.php:ro
+      - $LIB_PATH/mu-plugins/info.php:/var/www/html/wp-content/mu-plugins/info.php:ro
       - $LIB_PATH/scripts/container:/scripts
-      - $LIB_PATH/.htaccess:/var/www/html/.htaccess
+      - $LIB_PATH/.htaccess-${INSTALL_TYPE}:/var/www/html/.htaccess
       - $CWD_PATH/wp-content/plugins:/var/www/html/wp-content/plugins
       - $CWD_PATH/wp-content/themes:/var/www/html/wp-content/themes
       - $CWD_PATH/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins/files
+      - $CWD_PATH/logs/xdebug:/logs/xdebug
+
+      # Running Marker
       # Out Products
       - $CWD_PATH/wp-ultimo:/var/www/html/wp-content/plugins/wp-ultimo
+      
       # - $CWD_PATH/wp-admin-pages-pro:/var/www/html/wp-content/plugins/wp-admin-pages-pro
       # - $CWD_PATH/material-wp:/var/www/html/wp-content/plugins/material-wp
       # - $CWD_PATH/pro-theme:/var/www/html/wp-content/plugins/pro-theme
-    # ports:
-    #   - "8000:80"
-    # restart: never
+    restart: always
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wp
       WORDPRESS_DB_PASSWORD: wp
       WORDPRESS_DB_NAME: wp
-      VIRTUAL_HOST: $DOMAIN_NAME
+      VIRTUAL_HOST: ${DOMAIN_NAME},${ADDITIONAL_DOMAIN_NAMES},${MAPPED_DOMAIN_NAMES}
       VIRTUAL_PORT: 80
-  # phpmyadmin:
-  #   image: phpmyadmin/phpmyadmin:latest
-  #   container_name: phpmyadmin
-  #   restart: always
-  #   ports:
-  #     - "8085:80"
-  #   environment:
-  #     PMA_USER: pma
-  #     PMA_PASSWORD: pma
-  #     VIRTUAL_HOST: db.example.com
-  #     VIRTUAL_PORT: 85
-  #   depends_on:
-  #    - db
-  # nginx-proxy:
-  #   image: nginxproxy/nginx-proxy:alpine
-  #   container_name: nginx-proxy
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /var/run/docker.sock:/tmp/docker.sock:ro
-  #     - ~/.ceasar/certs:/etc/nginx/certs
-  #   depends_on:
-  #    - db
-  #    - wordpress
-  #    - mkcert
+  # ---------------
+  # Cert Generator
+  # - Generates SSL certs.
+  # ---------------
   mkcert:
     container_name: caesar-${SLUG}-cert
     networks:
@@ -91,10 +80,6 @@ services:
     build:
       context: ./images/mkcert
     environment:
-      DOMAIN: $DOMAIN_NAME
+      DOMAIN: ${DOMAIN_NAME},${ADDITIONAL_DOMAIN_NAMES},${MAPPED_DOMAIN_NAMES}
     volumes:
       - ~/.caesar/certs:/certs
-volumes:
-  wp: {}
-  db: {}
-  certs: {}

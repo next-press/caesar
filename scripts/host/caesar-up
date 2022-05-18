@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+# set -Eeuo pipefail
+# set -x
+
+. ${LIB_PATH}/scripts/lib/func.sh
+
+# function called by trap
+other_commands() {
+  stop_spinner
+  exit 1
+}
+
+trap 'other_commands' SIGINT
+
+# make down
+rm -rf "$CWD_PATH/certs"
+
+pdns "Starting..."
+# echo $LIB_PATH
+
+DM=
+
+if [ -n "$1" ]; then
+
+    DM=$1
+
+else
+
+    . "$CWD_PATH/.env" 2> /dev/null
+
+    DM="$DOMAIN_NAME"
+
+fi
+
+if ! [ -n "$DM" ]; then
+
+  echo "No domain name argument passed or .env file containing the DOMAIN_NAME variable file found."
+  
+  exit 1;
+
+fi
+
+if [ "$DM" == "undefined" ]; then
+
+  echo "Maldoformed .env file found... Removing it."
+
+  rm -f "$CWD_PATH/.env"
+  
+  exit 1;
+    
+fi
+
+export DOMAIN_NAME=$DM
+
+export ADDITIONAL_DOMAIN_NAMES="template.${DOMAIN_NAME},test.${DOMAIN_NAME},teste.${DOMAIN_NAME},pma.${DOMAIN_NAME},customer.${DOMAIN_NAME}"
+
+# check for existing mapped domains
+. "$CWD_PATH/.site-domains" 2> /dev/null
+if [ "$MAPPED_DOMAIN_NAMES" = "" ]; then
+  export MAPPED_DOMAIN_NAMES=$(${LIB_PATH}/scripts/lib/generate-mapped-domains 3 .dev)
+else
+  export MAPPED_DOMAIN_NAMES="$MAPPED_DOMAIN_NAMES"
+  pd "Existing mapped domains found: $MAPPED_DOMAIN_NAMES"
+fi
+
+# echo "$MAPPED_DOMAIN_NAMES";
+# exit;
+
+THE_SLUG=$(${LIB_PATH}/scripts/lib/slugify $DM)
+
+export SLUG="$THE_SLUG"
+
+touch "$CWD_PATH/.env"
+
+mkdir "$CWD_PATH/.vscode" 2> /dev/null
+
+cp "$LIB_PATH/launch.json" "$CWD_PATH/.vscode/launch.json"
+
+__log $THE_SLUG 'Starting...'
+
+CAESAR_LOG_FILE=~/.caesar/logs/$THE_SLUG.log
+
+${LIB_PATH}/scripts/lib/add-or-replace "$CWD_PATH/.env" "SLUG" $THE_SLUG
+${LIB_PATH}/scripts/lib/add-or-replace "$CWD_PATH/.env" "DOMAIN_NAME" $DM
+
+bash ${LIB_PATH}/scripts/host/caesar-install $1
+
+# docker network prune > /dev/null 2>&1
+
+export COMPOSE_IGNORE_ORPHANS=True
+
+docker network ls | grep -q "caesar_$THE_SLUG" || docker network create -d bridge "caesar_$THE_SLUG" > /dev/null 2>&1
+
+export COMPOSE_PROJECT_NAME=caesar
+
+echo ""
+start_spinner "Loading proxy container..."
+
+docker compose \
+  -f ${LIB_PATH}/docker-compose-proxy.yaml \
+  up -d  > "$CAESAR_LOG_FILE" 2>&1
+
+stop_spinner $?
+
+start_spinner "Loading site container..."
+
+export COMPOSE_PROJECT_NAME="caesar-$THE_SLUG"
+
+docker compose \
+  -f ${LIB_PATH}/docker-compose.yaml \
+  up -d --build > "$CAESAR_LOG_FILE" 2>&1
+  # --build
+
+stop_spinner $?
+
+# cp "${LIB_PATH}/config/wp-config.php"
+start_spinner "Checking hosts file permissions, you might need to enter your password..."
+sleep 2
+stop_spinner $?
+
+bash "${LIB_PATH}/scripts/lib/update-hosts.sh" "$DM" "$MAPPED_DOMAIN_NAMES" "$ADDITIONAL_DOMAIN_NAMES"
+
+start_spinner "Updating the hosts file..."
+sleep 2
+stop_spinner $?
+
+#
+# Init inside the container
+#
+touch "$CWD_PATH/.env"
+
+cat "$CWD_PATH/.env" | grep -q INSTALLED
+
+if [ $? -eq 0 ]; then
+
+  pd "WordPress already installed. Skiping..."
+
+else 
+
+  start_spinner "Installing WordPress in $INSTALL_TYPE install mode...";
+
+  docker exec -u root "caesar-${SLUG}-wordpress" bash /scripts/init.sh $DM "$INSTALL_TYPE" && echo "INSTALLED=1" >> $CWD_PATH/.env
+
+  stop_spinner $?
+
+fi
+#
+# End Check for Installatation.
+#
+
+## You create a directory to store your mkcert certificates
+sudo rm -rf ~/Documents/root-ca
+
+mkdir ~/Documents/root-ca 2> /dev/null
+
+# touch "$CWD_PATH/.status"
+
+# cat "$CWD_PATH/.status" | grep -q "TRUSTED=$DOMAIN_NAME"
+
+# if [ $? -eq 0 ]; then
+
+#   echo "Root Certificated already trusted. Skiping..."
+
+# else
+
+  echo
+  start_spinner "Waiting for certificates to be issued for $DM..."
+  
+  while :
+    do
+
+    if docker container ls | grep "caesar-$THE_SLUG-cert" &> /dev/null; then
+      sleep 3
+    else
+      stop_spinner 0
+
+      start_spinner "Coping root certificates to host machine..."
+      sleep 5
+      stop_spinner $?
+
+      break
+    fi
+
+  done
+
+  ## You copy your mkcert keys from your docker container to your localhost
+  docker cp "caesar-$THE_SLUG-cert:/root/.local/share/mkcert" ~/Documents/root-ca > /dev/null 2>&1
+
+  # start_spinner "Trusting certificates via Keychain... You might need to approve it."
+
+  ## Make MacOS trust the certificates
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/Documents/root-ca/mkcert/rootCA.pem
+
+  # stop_spinner $?
+
+#   echo "TRUSTED=$DOMAIN_NAME" >> $CWD_PATH/.status
+
+# fi
+
+reset
+
+# Update mapped domain list
+rm -f "$CWD_PATH/.site-domains"
+touch "$CWD_PATH/.site-domains"
+IFS=',' read -ra domain_array <<< "$MAPPED_DOMAIN_NAMES"
+
+"$LIB_PATH/scripts/lib/generate-domain-list-file" >> "$CWD_PATH/.site-domains"
+
+# FInish screen from now on.
+"$LIB_PATH/scripts/lib/header"
+
+box_out \
+  '                                            ' \
+  "Just like that, we are ready!" \
+  '                                            ' \
+  "Site URL: $(tput setaf 6)https://$DM" \
+  "Site Admin: $(tput setaf 6)https://$DM/wp-admin" \
+  "Credentials: $(tput setaf 6)admin / admin" \
+  '                                            ' \
+  'Sub-domains registered and with SSL:' \
+  $("$LIB_PATH/scripts/lib/break-into-lines" "$ADDITIONAL_DOMAIN_NAMES" "  $(tput setaf 6)https://") \
+  '                                            ' \
+  'Mapped domains registered and with SSL:' \
+  $("$LIB_PATH/scripts/lib/break-into-lines" "$MAPPED_DOMAIN_NAMES" "  $(tput setaf 6)https://") \
+  '                                            ' \
+  "To shut this site down, use:" \
+  "$(tput setaf 6)$ npx @next-press/caesar down $DM" \
+  '                                            ' \
+  "To shut all sites, run:" \
+  "$(tput setaf 6)$ npx @next-press/caesar down" \
+  '                                            ' \
+  
+echo ""

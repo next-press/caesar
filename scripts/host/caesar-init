@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+. ${LIB_PATH}/scripts/lib/func.sh
+
+# Name of the project.
+NAME=$1
+
+DOMAIN_NAME=$2
+
+mkdir "$NAME"
+
+cd "$NAME";
+
+npm init -y > /dev/null 2>&1
+
+npm link caesar > /dev/null 2>&1
+
+caesar up $DOMAIN_NAME
+
+pdns "Run \`cd $NAME\` to change to the newly created project"
+pdns "Or run \`code $NAME\` to open it on VSCode."
+
+echo ""

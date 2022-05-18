@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+const glue = process.argv[3] ?? "";
+
+const result = glue + process.argv[2].split(',').join("\n" + glue);
+
+console.log(result);

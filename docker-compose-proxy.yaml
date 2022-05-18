@@ -1,0 +1,24 @@
+version: "3.9"
+
+networks:
+  caesar_supervisor:
+    external: true
+    name: caesar_supervisor
+
+services:
+  # ---------------
+  # NGINX Proxy
+  # - Handles HTTP proxying to sites.
+  # ---------------
+  nginx-proxy:
+    container_name: caesar-nginx-proxy
+    image: nginxproxy/nginx-proxy:alpine
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - caesar_supervisor
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ~/.caesar/certs:/etc/nginx/certs

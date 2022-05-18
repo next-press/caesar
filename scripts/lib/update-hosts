@@ -21,18 +21,30 @@ let slug = slugify(process.argv[2], {
 
 slug = slug.replace(/\./g, '-');
 
-const ceasarBlock = `
-# ${ slug } - Added by Ceasar
-127.0.0.1 ${ domain }
-127.0.0.1 template.${ domain }
-127.0.0.1 test.${ domain }
-127.0.0.1 teste.${ domain }
-127.0.0.1 pma.${ domain }
-127.0.0.1 customer.${ domain }
-# End - ${ slug } - Added by Ceasar`;
+const additional = process.argv[4] ?? '';
 
-const newContent = hostsContent.toString().replace(new RegExp(`# ${ slug } - Added by Ceasar\s([\S\s]+)\s# End - ${ slug } - Added by Ceasar`, 'gm'), '') + ceasarBlock;
+const mapped = process.argv[3] ?? '';
+
+const domainList = [
+  domain, 
+  ...(additional ? additional.split(',') : []),
+  ...(mapped ? mapped.split(',') : []),
+];
+
+let finalList = '';
+
+for (let i = 0; i < domainList.length; i++) {
+  
+  const item = domainList[i];
+
+  finalList += `\n127.0.0.1 ${ item }`.padEnd(40) + `# Caesar - ${ slug }`
+  
+} // end for;
+
+const ceasarBlock = finalList;
+
+const regexp = new RegExp("\\s(.+)(#\\s(Caesar - " + slug + "))", 'g');
+
+const newContent = hostsContent.toString().replace(regexp, '') + ceasarBlock;
 
 fs.writeFileSync('/etc/hosts', newContent);
-
-exit(0);

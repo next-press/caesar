@@ -1,0 +1,181 @@
+#!/usr/bin/env node
+const { program, Argument, Option } = require('commander');
+const package = require('../../package.json');
+const path = require('path');
+const _ = require('lodash');
+const { exit } = require('process');
+const os = require('os')
+const fs = require('fs'); 
+const { execSync } = require('child_process');
+
+/**
+ * Initial Setup
+ */
+program
+  .name('Caesar')
+  .version(package.version)
+  .description('Provision and manage development sites using docker.')
+  .addHelpText('afterAll', '\n')
+  .showSuggestionAfterError()
+  .addHelpText('beforeAll', () => {
+
+    let header = [];
+
+    var figlet = require('figlet');
+
+    header.push(figlet.textSync('Caesar', {
+      // font: 'Ghost',
+      horizontalLayout: 'default',
+      verticalLayout: 'default',
+      width: 60,
+      whitespaceBreak: true
+    }));
+
+    header = _.filter(header);
+
+    return header.join('');
+
+  });
+
+/**
+ * Debug Setup
+ */
+const debugHandler = (thisCommand, actionCommand) => {
+
+  if (thisCommand.opts().debug) {
+
+    console.log(`About to call action handler for subcommand: ${actionCommand.name()}`);
+    console.log('Arguments: %O', actionCommand.args);
+    console.log('Options: %o', actionCommand.opts());
+
+  } // end if;
+
+};
+
+program
+  .option('-d, --debug', 'display additional info to help in finding problems')
+  .hook('preAction', debugHandler);
+
+/**
+ * Register Commands
+ */
+program
+  .command('init')
+  .description('create a folder and initialize a new site container inside it')
+  .argument('<folder-name>', 'the name of the folder to be created')
+  .argument('<domain-name>', 'the domain to be used for the new site')
+program
+  .command('up')
+  .description('start the containers for a given site')
+  .argument('[domain-name]', 'the domain name to use for the site container')
+program
+  .command('down')
+  .description('stop the containers for a given site')
+  .argument('[domain-name]', 'the domain name of the site container to disable')
+program
+  .command('reset')
+  .description('reset the database to the initial state (fresh install)')
+  .argument('[domain-name]', 'the domain name of the site container to reset')
+program
+  .command('shutdown')
+  .description('stop all site containers currently running')
+
+const generateHeader = function () {
+
+  let header = [];
+
+  const welcome = require('cli-welcome');
+
+  const oldCL = console.log;
+
+  header.push(process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H');
+
+  console.log = text => {
+
+    header.push(text);
+
+  };
+
+  // OR with all the options set like this:
+  welcome({
+    title: `Caesar - Docker Development Environment`,
+    tagLine: `by NextPress`,
+    bgColor: `#FADC00`,
+    color: `#000000`,
+    bold: false,
+    clear: false,
+    version: `${package.version}`
+  });
+
+  console.log = oldCL;
+
+  header = _.filter(header);
+
+  return header.join('');
+
+}
+
+// console.log(generateHeader());
+
+/** Initial Parse */
+program.parse(process.argv);
+
+program.commands = [];
+  
+program
+  .executableDir(path.join(process.env.LIB_PATH, 'scripts', 'host'))
+  .command('init <folder-name> <domain-name>', 'create a folder and initialize a new site container')
+  .command('up [domain-name]', 'start the containers for a given site')
+  .command('down [domain-name]', 'stop the containers for a given site')
+  .command('reset [domain-name]', 'reset the database to the initial state (fresh install)')
+  .command('shutdown', 'stop all site containers currently running')
+
+/**
+ * Prevent fatal errors on UP commands
+ */
+if (process.argv[2] == 'up') {
+
+  const forbiddenPathList = [
+    os.homedir(),
+    path.join(os.homedir(), 'Desktop'),
+    path.resolve(process.env.LIB_PATH)
+  ];
+
+  const warningConditions = [
+    {
+      error: "You're not allowed to run this here.",
+      condition: forbiddenPathList.includes(process.env.CWD_PATH),
+    },
+    {
+      error: "Missing domain name property.",
+      condition: 
+        process.argv[2] == 'up' &&
+        typeof process.argv[3] === 'undefined' && 
+        (
+          ! fs.existsSync(path.join(process.env.CWD_PATH, '.env')) || 
+          ! fs.readFileSync(path.join(process.env.CWD_PATH, '.env')).toString().includes('DOMAIN_NAME')
+        )
+    },
+  ];
+
+  warningConditions.forEach((item) => {
+
+    if (item.condition) {
+
+      program.error(`${ item.error }\n`);
+
+    } // end oif;
+
+  });
+
+} // end if;
+
+const commandsWithNetwork = [
+  'up',
+  'reset'
+];
+
+/**
+ * Delegate the command run.
+ */
+program.parse(process.argv);

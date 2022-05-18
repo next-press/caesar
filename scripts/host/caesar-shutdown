@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sh -c "$LIB_PATH/scripts/host/caesar-down shutdown";
