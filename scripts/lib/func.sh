@@ -92,7 +92,7 @@ function _spinner() {
     #           $3 spinner function pid (supplied from stop_spinner)
 
     local on_success="→ Done"
-    local on_fail="→ Failed"
+    local on_fail="→ Fail"
     local white="$(tput setaf 5)"
     local green="$(tput setaf 2)"
     local red="$(tput setaf 1)"
@@ -100,10 +100,16 @@ function _spinner() {
 
     case $1 in
         start)
+
+            TEXT="$(tput setaf 4)ー ${2}$(tput setaf 7)"
+
             # calculate the column where spinner and status msg will be displayed
-            let column=$(tput cols)-${#2}-8
+            let column=$(tput cols)-${#TEXT}
+
             # display message and position the cursor in $column column
-            echo -ne ${2}
+            # echo -ne "\e[1;30mー Lionel \e[0m"
+            echo -ne $TEXT
+
             printf "%${column}s"
 
             # start spinner
@@ -119,7 +125,7 @@ function _spinner() {
             ;;
         stop)
             if [[ -z ${3} ]]; then
-                echo "spinner is not running.."
+                # echo "spinner is not running.."
                 exit 1
             fi
 

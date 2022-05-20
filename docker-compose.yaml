@@ -32,7 +32,7 @@ services:
   # - WP Core
   # ---------------
   wordpress:
-    image: nextpress/caesar-wordpress:0.0.2
+    image: nextpress/caesar-wordpress:latest
     container_name: caesar-${SLUG}-wordpress
     depends_on:
       - caesar-${SLUG}-db
@@ -62,7 +62,7 @@ services:
       # - $CWD_PATH/pro-theme:/var/www/html/wp-content/plugins/pro-theme
     restart: always
     environment:
-      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_HOST: caesar-${SLUG}-db
       WORDPRESS_DB_USER: wp
       WORDPRESS_DB_PASSWORD: wp
       WORDPRESS_DB_NAME: wp
@@ -73,7 +73,7 @@ services:
   # - Generates SSL certs.
   # ---------------
   mkcert:
-    image: nextpress/caesar-wordpress:0.0.2
+    image: nextpress/caesar-mkcert:latest
     container_name: caesar-${SLUG}-cert
     networks:
       - caesar_supervisor

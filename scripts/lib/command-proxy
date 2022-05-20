@@ -79,6 +79,9 @@ program
 program
   .command('shutdown')
   .description('stop all site containers currently running')
+program
+  .command('purge')
+  .description('kill and remove all the site containers currently not running')
 
 const generateHeader = function () {
 
@@ -115,7 +118,7 @@ const generateHeader = function () {
 
 }
 
-// console.log(generateHeader());
+console.log(generateHeader());
 
 /** Initial Parse */
 program.parse(process.argv);
@@ -129,6 +132,7 @@ program
   .command('down [domain-name]', 'stop the containers for a given site')
   .command('reset [domain-name]', 'reset the database to the initial state (fresh install)')
   .command('shutdown', 'stop all site containers currently running')
+  .command('purge', 'kill and remove all the site containers currently not running')
 
 /**
  * Prevent fatal errors on UP commands

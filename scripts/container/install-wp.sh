@@ -1,44 +1,62 @@
 #!/usr/bin/env bash
-# set +x
-# env
+{
 
-cd /var/www/html && mv ".htaccess-$INSTALL_TYPE" .htaccess
-
-if wp core is-installed --allow-root &> /dev/null; then
-  echo "WordPress already installed... Skipping..."
-  exit
-fi
-
-while :
-do
-
-  if ! wp core version --allow-root &> /dev/null; then
-    # echo "Waiting for WordPress image to boot up..."
-    sleep 3s
-  else 
-    # echo "Almost there..."
-    sleep 10s
-    break
+  if wp core is-installed --allow-root &> /dev/null; then
+    exit
   fi
 
-done
+  while :
+    do
+    if ! [ -s /var/www/html/wp-config.php ]; then
+      sleep 3s
+    else 
+      sleep 3s
+      break
+    fi
 
-# echo "Installing WordPress..."
+  done
 
-if [ "$INSTALL_TYPE" == "subdomain" ]; then
+  touch /var/www/html/install.log
 
-  wp core multisite-install --subdomains --url="$DOMAIN_NAME" --title="NextPress Sites" --admin_user=admin --admin_password=admin --admin_email=admin@nextpress.dev --allow-root
+  mv "/var/www/html/.htaccess-$INSTALL_TYPE" /var/www/html/.htaccess
 
-elif [ "$INSTALL_TYPE" == "single" ]; then
+  if [ "$INSTALL_TYPE" == "subdomain" ]; then
 
-  wp core install --url="$DOMAIN_NAME" --title="NextPress Sites" --admin_user=admin --admin_password=admin --admin_email=admin@nextpress.dev --allow-root
+    wp core multisite-install \
+    --subdomains --url="$DOMAIN_NAME" \
+    --title="NextPress Sites" \
+    --admin_user=admin \
+    --admin_password=admin \
+    --admin_email=admin@nextpress.dev \
+    --allow-root
 
-else
+  elif [ "$INSTALL_TYPE" == "single" ]; then
 
-  wp core multisite-install --url="$DOMAIN_NAME" --title="NextPress Sites" --admin_user=admin --admin_password=admin --admin_email=admin@nextpress.dev --allow-root
+    wp core install \
+    --url="$DOMAIN_NAME" \
+    --title="NextPress Sites" \
+    --admin_user=admin \
+    --admin_password=admin \
+    --admin_email=admin@nextpress.dev\
+    --allow-root
 
-fi
+  else
 
-# Install plugins
-wp plugin install query-monitor --allow-root --activate-network
-wp plugin install debug-bar-slow-actions --allow-root
+    wp core multisite-install \
+    --url="$DOMAIN_NAME" \
+    --title="NextPress Sites" \
+    --admin_user=admin \
+    --admin_password=admin \
+    --admin_email=admin@nextpress.dev \
+    --allow-root
+
+  fi
+
+  wp plugin install query-monitor \
+    --allow-root \
+    --activate-network
+    
+  wp plugin install debug-bar-slow-actions \
+    --allow-root
+
+} &> /var/www/html/install.log

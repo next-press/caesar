@@ -5,10 +5,13 @@
   "main": "index.js",
   "bin": "caesar",
   "scripts": {
-    "build:wordpress": "docker build --rm -t nextpress/caesar-wordpress:${npm_package_version} ./images/wordpress",
-    "push:wordpress": "docker push nextpress/caesar-wordpress:${npm_package_version}",
-    "build:mkcert": "docker build --rm -t nextpress/caesar-mkcert:${npm_package_version} ./images/mkcert",
-    "push:mkcert": "docker push nextpress/caesar-mkcert:${npm_package_version}"
+    "build:wordpress": "docker build --rm -t nextpress/caesar-wordpress:${npm_package_version} -t nextpress/caesar-wordpress:latest ./images/wordpress",
+    "push:wordpress": "docker push nextpress/caesar-wordpress",
+    "build:mkcert": "docker build --rm -t nextpress/caesar-mkcert:${npm_package_version} -t nextpress/caesar-mkcert:latest ./images/mkcert",
+    "push:mkcert": "docker push nextpress/caesar-mkcert",
+    "build": "npm run build:wordpress && npm run build:mkcert",
+    "push": "npm run push:wordpress && npm run push:mkcert",
+    "version": "echo $npm_package_version"
   },
   "repository": {
     "type": "git",

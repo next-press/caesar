@@ -10,8 +10,8 @@ RUN yes | pecl install xdebug
 
 COPY xdebug.ini /usr/local/etc/php/conf.d
 
-COPY .htaccess-single /var/www/html/.htaccess-single
+COPY htaccess-single /usr/src/wordpress/.htaccess-single
 
-COPY .htaccess-subdir /var/www/html/.htaccess-subdir
+COPY htaccess-subdir /usr/src/wordpress/.htaccess-subdir
 
-COPY .htaccess-subdomain /var/www/html/.htaccess-subdomain
+COPY htaccess-subdomain /usr/src/wordpress/.htaccess-subdomain

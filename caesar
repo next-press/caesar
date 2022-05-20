@@ -11,5 +11,6 @@ LIB_SCRIPTS_PATH="${LIB_PATH}/scripts/lib/"
 
 export LIB_PATH="${LIB_PATH}" 
 export CWD_PATH="${CWD_PATH}" 
+export CAESAR_VERSION=$(npm run version --silent)
 
 "${LIB_SCRIPTS_PATH}/command-proxy" "$@"

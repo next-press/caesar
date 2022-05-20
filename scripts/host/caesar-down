@@ -9,13 +9,24 @@ else
   . "${CWD_PATH}/.env" > /dev/null 2>&1
 fi
 
-if [ "$SLUG" != "shutdown" ]; then
+if [ "$SLUG" == "shutdown" ]; then
 
-  start_spinner "Shutting containers for site $SLUG down..."
-    
-  docker container stop $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
-  docker container kill $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
-  docker container rm $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
+  start_spinner "Shutting containers for all sites..."
+
+  docker container stop $(docker container ls -q --all) > /dev/null 2>&1
+  # docker container kill $(docker container ls -q --all) > /dev/null 2>&1
+  # docker container rm $(docker container ls -q --all) > /dev/null 2>&1
+
+  stop_spinner 0
+  
+  pd "See you later!"
+
+elif [ "$SLUG" == "purge" ]; then
+
+  start_spinner "Shutting containers for all sites..."
+
+  docker container stop $(docker container ls -q --filter "status=exited") > /dev/null 2>&1
+  docker container rm $(docker container ls -q --filter "status=exited") > /dev/null 2>&1
 
   stop_spinner 0
   
@@ -23,11 +34,11 @@ if [ "$SLUG" != "shutdown" ]; then
 
 else
 
-  start_spinner "Shutting containers for all sites..."
-
-  docker container stop $(docker container ls -q --all) > /dev/null 2>&1
-  docker container kill $(docker container ls -q --all) > /dev/null 2>&1
-  docker container rm $(docker container ls -q --all) > /dev/null 2>&1
+  start_spinner "Shutting containers for site $SLUG down..."
+    
+  docker container stop $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
+  # docker container kill $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
+  # docker container rm $(docker container ls -q --all --filter "name=$SLUG") > /dev/null 2>&1
 
   stop_spinner 0
   

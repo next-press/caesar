@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# set -x
+
+. ${LIB_PATH}/scripts/lib/func.sh
+
+if [ -n "$1" ]; then
+  SLUG=$1
+else
+  . "${CWD_PATH}/.env" > /dev/null 2>&1
+fi
+
+if ! [ -n "$SLUG" ]; then
+  
+  pd "This needs to be run inside a project folder, or by passing the project slug as a parameter."
+
+fi
+
+SLUG=$(${LIB_PATH}/scripts/lib/slugify $SLUG)
+
+if ! [ docker container ls | grep "$SLUG" &> /dev/null ]; then
+  
+  pd "To reset a site container, it needs to be running first."
+
+fi
+
+# Reset
+# docker exec -u root "caesar-${SLUG}-wordpress" bash rm -rf /var/www/html
+
+start_spinner "Reseting containers..."
+
+{
+  docker container stop "caesar-$SLUG-wordpress"
+  docker container stop "caesar-$SLUG-db"
+  docker container stop "caesar-$SLUG-cert"
+
+  docker container rm "caesar-$SLUG-wordpress"
+  docker container rm "caesar-$SLUG-db"
+  docker container rm "caesar-$SLUG-cert"
+} &> /dev/null
+
+stop_spinner 0
+
+pd "Go to the project directory and run \`caesar up\` to re-build the environment."
+
+exit
