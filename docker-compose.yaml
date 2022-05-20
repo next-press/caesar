@@ -32,13 +32,11 @@ services:
   # - WP Core
   # ---------------
   wordpress:
-    # image: wordpress:latest
+    image: nextpress/caesar-wordpress:0.0.2
     container_name: caesar-${SLUG}-wordpress
     depends_on:
       - caesar-${SLUG}-db
       - caesar-${SLUG}-cert
-    build:
-      context: ./images/wordpress
     networks:
       - caesar_supervisor
       - caesar_site
@@ -47,7 +45,9 @@ services:
       - $LIB_PATH/mu-plugins/autoloader.php:/var/www/html/wp-content/mu-plugins/autoloader.php:ro
       - $LIB_PATH/mu-plugins/info.php:/var/www/html/wp-content/mu-plugins/info.php:ro
       - $LIB_PATH/scripts/container:/scripts
-      - $LIB_PATH/.htaccess-${INSTALL_TYPE}:/var/www/html/.htaccess
+      # - $LIB_PATH/htaccess/.htaccess-single:/var/www/html/.htaccess-single
+      # - $LIB_PATH/htaccess/.htaccess-subdir:/var/www/html/.htaccess-subdir
+      # - $LIB_PATH/htaccess/.htaccess-subdomain:/var/www/html/.htaccess-subdomain
       - $CWD_PATH/wp-content/plugins:/var/www/html/wp-content/plugins
       - $CWD_PATH/wp-content/themes:/var/www/html/wp-content/themes
       - $CWD_PATH/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins/files
@@ -73,12 +73,11 @@ services:
   # - Generates SSL certs.
   # ---------------
   mkcert:
+    image: nextpress/caesar-wordpress:0.0.2
     container_name: caesar-${SLUG}-cert
     networks:
       - caesar_supervisor
       - caesar_site
-    build:
-      context: ./images/mkcert
     environment:
       DOMAIN: ${DOMAIN_NAME},${ADDITIONAL_DOMAIN_NAMES},${MAPPED_DOMAIN_NAMES}
     volumes:

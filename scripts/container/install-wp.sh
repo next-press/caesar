@@ -2,6 +2,8 @@
 # set +x
 # env
 
+cd /var/www/html && mv ".htaccess-$INSTALL_TYPE" .htaccess
+
 if wp core is-installed --allow-root &> /dev/null; then
   echo "WordPress already installed... Skipping..."
   exit
