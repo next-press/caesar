@@ -18,6 +18,11 @@ As of now, this tool only supports macOS (it should support Linux as well, but t
 
 ## Installing
 
+Before installing, make sure you add the line below to your home directory `.npmrc` file:
+```
+@next-press:registry=https://npm.pkg.github.com
+```
+
 To install it, run:
 ```
 npm install -g @next-press/caesar
