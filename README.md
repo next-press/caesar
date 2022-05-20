@@ -3,7 +3,7 @@ NextPress' Lean docker-based **WordPress** development environment.
 
 ## Introduction
 
-The idea is simple: automate the spinning of new development environments that are fast, debuggable, capable of supporting HTTPs out of the box.
+The idea is simple: automate the spinning of new development environments that are fast, debuggable, and offering HTTPs out of the box.
 
 It also register additional commonly used subdomains, as well as three automatically generated domains that can be used for testing mapped domain features.
 
