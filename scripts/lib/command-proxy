@@ -73,9 +73,17 @@ program
   .description('stop the containers for a given site')
   .argument('[domain-name]', 'the domain name of the site container to disable')
 program
+  .command('restart')
+  .description('restarts the container sites (alias for `caesar down && caesar up`)')
+  .argument('[domain-name]', 'the domain name of the site container to restart')
+program
   .command('reset')
   .description('reset the database to the initial state (fresh install)')
   .argument('[domain-name]', 'the domain name of the site container to reset')
+program
+  .command('ssh')
+  .description('starts a ssh session inside the wordpress container')
+  .argument('[domain-name]', 'the domain name of the site container to enter')
 program
   .command('shutdown')
   .description('stop all site containers currently running')
@@ -130,7 +138,9 @@ program
   .command('init <folder-name> <domain-name>', 'create a folder and initialize a new site container')
   .command('up [domain-name]', 'start the containers for a given site')
   .command('down [domain-name]', 'stop the containers for a given site')
+  .command('restart [domain-name]', 'restarts the container sites (alias for `caesar down && caesar up`)')
   .command('reset [domain-name]', 'reset the database to the initial state (fresh install)')
+  .command('ssh [domain-name]', 'starts a ssh session inside the wordpress container')
   .command('shutdown', 'stop all site containers currently running')
   .command('purge', 'kill and remove all the site containers currently not running')
 

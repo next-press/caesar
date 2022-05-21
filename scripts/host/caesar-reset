@@ -11,15 +11,19 @@ fi
 
 if ! [ -n "$SLUG" ]; then
   
-  pd "This needs to be run inside a project folder, or by passing the project slug as a parameter."
+  pdns "This needs to be run inside a project folder, or by passing the project slug as a parameter."
 
 fi
 
 SLUG=$(${LIB_PATH}/scripts/lib/slugify $SLUG)
 
-if ! [ docker container ls | grep "$SLUG" &> /dev/null ]; then
+if ! docker container ls | grep "$SLUG" &> /dev/null; then
   
-  pd "To reset a site container, it needs to be running first."
+  pdns "To reset a site container, it needs to be running first."
+
+  echo ""
+
+  exit;
 
 fi
 
@@ -36,10 +40,26 @@ start_spinner "Reseting containers..."
   docker container rm "caesar-$SLUG-wordpress"
   docker container rm "caesar-$SLUG-db"
   docker container rm "caesar-$SLUG-cert"
+
+  echo "INSTALLED=1" >> $CWD_PATH/.env
 } &> /dev/null
 
 stop_spinner 0
 
-pd "Go to the project directory and run \`caesar up\` to re-build the environment."
+cat "$CWD_PATH/.env" | grep -q "SLUG=$SLUG"
 
-exit
+if [ $? -ne 0 ]; then
+
+  pd "Go to the project directory and run \`caesar up\` to re-build the environment."
+
+  echo ""
+
+  exit
+
+fi
+
+pd "Since we are already inside the target project, let's spin it up..."
+
+sleep 2
+
+caesar up

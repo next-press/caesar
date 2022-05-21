@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# set -x
+
+. ${LIB_PATH}/scripts/lib/func.sh
+
+start_spinner "Taking it down...";
+
+caesar down $1 &> /dev/null
+
+DOWN=$?
+
+stop_spinner $DOWN
+
+if [ $DOWN -eq 0 ]; then
+
+  caesar up $1
+
+else 
+
+  pd "Unable to take containers down... You will need to do it by hand first."
+
+  exit 1;
+
+fi

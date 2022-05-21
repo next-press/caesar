@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const randomWords = require('random-words');
 
-const number = parseInt(process.argv[2] ?? 3, 10);
+const number = parseInt(process.argv[2] ?? 4, 10);
 
 const extension = process.argv[3] ?? '.dev';
 

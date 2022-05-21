@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# set -x
+
+. ${LIB_PATH}/scripts/lib/func.sh
+
+if [ -n "$1" ]; then
+  SLUG=$1
+else
+  . "${CWD_PATH}/.env" > /dev/null 2>&1
+fi
+
+SLUG=$(${LIB_PATH}/scripts/lib/slugify $SLUG 2> /dev/null)
+
+CONTAINER=${2:-wordpress}
+
+pdns "Entering container ${CONTAINER} for ${SLUG}... (type 'exit' to return to the main shell)"
+
+echo ""
+
+let column=$(tput cols)
+
+# printf "%${column}s"
+printf "%0.s-" $(seq 1 $column)
+
+echo ""
+echo ""
+
+docker exec -it "caesar-${SLUG}-${CONTAINER}" sh

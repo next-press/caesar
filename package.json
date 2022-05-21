@@ -6,6 +6,8 @@
   "bin": "caesar",
   "scripts": {
     "build:wordpress": "docker build --rm -t nextpress/caesar-wordpress:${npm_package_version} -t nextpress/caesar-wordpress:latest ./images/wordpress",
+    "build:wp": "docker build --rm -t nextpress/caesar-wp:${npm_package_version} -t nextpress/caesar-wp:latest ./images/wp && docker run -d --name apache -p 8080:80 -p 4443:443 nextpress/caesar-wp",
+    "build:cert": "docker build --rm -t nextpress/caesar-cert:${npm_package_version} -t nextpress/caesar-cert:latest ./images/cert",
     "push:wordpress": "docker push nextpress/caesar-wordpress",
     "build:mkcert": "docker build --rm -t nextpress/caesar-mkcert:${npm_package_version} -t nextpress/caesar-mkcert:latest ./images/mkcert",
     "push:mkcert": "docker push nextpress/caesar-mkcert",
@@ -28,10 +30,12 @@
   },
   "homepage": "https://github.com/next-press/caesar#readme",
   "dependencies": {
+    "boxt": "^1.1.2",
     "cli-welcome": "^2.2.2",
     "commander": "^9.2.0",
     "figlet": "^1.5.2",
     "lodash": "^4.17.21",
+    "pad": "^3.2.0",
     "random-words": "^1.1.2",
     "slugify": "^1.6.5"
   }

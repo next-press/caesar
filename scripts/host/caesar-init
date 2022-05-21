@@ -7,7 +7,17 @@ NAME=$1
 
 DOMAIN_NAME=$2
 
-mkdir "$NAME"
+mkdir "$NAME" 2> /dev/null
+
+if [ $? -eq 1 ]; then
+
+  pdns "Unable to create the target directory '$1'..."
+
+  echo ""
+
+  exit 1;
+
+fi
 
 cd "$NAME";
 

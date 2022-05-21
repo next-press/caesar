@@ -6,7 +6,7 @@ networks:
     name: caesar_supervisor
   caesar_site:
     external: true
-    name: caesar_${SLUG}
+    name: caesar_site_${SLUG}
 
 services:
   # ---------------

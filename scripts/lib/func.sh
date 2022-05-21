@@ -1,5 +1,4 @@
 # set -Exeuo pipefail
-
 if ! [ -n "$INSTALL_TYPE" ]; then
   INSTALL_TYPE="subdir"
 fi
@@ -26,10 +25,14 @@ function pdns {
 
 other_commands() {
   pd "Process interrupted"
+  echo ""
+  kill 0
   exit 1
 }
 
 trap 'other_commands' SIGINT
+# trap "other_commands" INT TERM ERR
+# trap "kill 0" EXIT
 
 function check_status {
 
@@ -101,7 +104,7 @@ function _spinner() {
     case $1 in
         start)
 
-            TEXT="$(tput setaf 4)ー ${2}$(tput setaf 7)"
+            TEXT="$(tput setaf 8)ー ${2}$(tput setaf 7)"
 
             # calculate the column where spinner and status msg will be displayed
             let column=$(tput cols)-${#TEXT}
@@ -161,6 +164,7 @@ function stop_spinner {
     unset _sp_pid
 }
 
+COLS=$(tput cols)
 
 function box_out()
 {
@@ -184,5 +188,25 @@ function __log() {
   touch ~/.caesar/logs/$1.log > /dev/null 2>&1
 
   echo $2 >> ~/.caesar/logs/$1.log > /dev/null 2>&1
+
+}
+
+
+function dumpdb {
+
+  # Force the creation
+  FORCE=${FORCE_SQL_DUMP:-no}
+
+  mkdir "$HOME/.caesar/db/fresh-state" &> /dev/null
+
+  DUMP=$(docker exec "caesar-$SLUG-db" sh -c "mysqldump --user root --password=root wp")
+
+  if [ $? -eq 0 ]; then
+
+    echo "$DUMP" > "$HOME/.caesar/db/fresh-state/$SLUG.sql"
+
+  fi
+
+  return $?
 
 }

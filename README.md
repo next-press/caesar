@@ -100,5 +100,12 @@ Caesar installs and activated Query Monitor by default, and installs Debug Bar S
 
 ## Changelog
 
+#### Version 0.0.6 - 2022-05-21
+
+* Feature: reset command;
+* Feature: purge command;
+* Feature: ssh command;
+* Fixes: Several minor.
+
 #### Version 0.0.5 - 2022-05-20
 * Feature: adds the `purge` command to remove all inactive containers;

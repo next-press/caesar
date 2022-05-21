@@ -1,8 +1,31 @@
 #!/usr/bin/env bash
+
+function tap_wp_config {
+
+  if [ "$INSTALL_TYPE" == "single" ]; then
+    return
+  fi
+
+  cat wp-config.php | grep 
+
+  if [ "$INSTALL_TYPE" == "subdomain" ]; then
+
+    pwd;
+
+  elif [ "$INSTALL_TYPE" == "subdomain" ]; then
+
+    pwd
+
+  fi
+
+}
+
 {
 
   if wp core is-installed --allow-root &> /dev/null; then
-    exit
+    
+    wp config set 
+    
   fi
 
   while :

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const { exit } = require('process');
 
 const file = process.argv[2];
 
@@ -11,7 +12,16 @@ let content = `${key}=${value}`
 
 if (fs.existsSync(file)) {
 
-  content += "\n" + fs.readFileSync(file).toString().replace(new RegExp(`${ key }=(.*)`, 'g'), '');
-}
+  try {
+    
+    content += "\n" + fs.readFileSync(file).toString().replace(new RegExp(`${ key }=(.*)`, 'g'), '');
 
-fs.writeFileSync(file, content.replace(/^\s*\n/gm, ''));
+    fs.writeFileSync(file, content.replace(/^\s*\n/gm, ''));
+
+  } catch {
+
+    // File is a folder, skip.
+
+  }
+
+}

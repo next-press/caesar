@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+const boxt = require('boxt');
+const chalk = require('chalk');
+const _ = require('lodash');
+const pad = require('pad');
+
+function getLongestString(stringArray) {
+  var longestString = "";
+  for (var i = 0; i < stringArray.length; i++) {
+    if (stringArray[i].length > longestString.length) {
+      longestString = stringArray[i];
+    }
+  }
+  return longestString;
+};
+
+const formatDomains = function(list) {
+
+  const domainList = list.split(',').map(item => `https://${ item }`);
+  
+  const maxLength = getLongestString(domainList).length;
+
+  const length = maxLength + 4;
+
+  const chunkedDomainList = _.chunk(domainList, 2);
+
+  const result = _.map(chunkedDomainList, function(item) {
+
+    return _.reduce(item, function(subList, subItem) {
+
+      subList = pad(subList, length) + subItem;
+
+      return subList;
+
+    });
+
+  });
+
+  return result.join("\n");
+
+}
+
+let header = [];
+
+var figlet = require('figlet');
+
+header.push(figlet.textSync('Caesar', {
+  // font: 'Ghost',
+  horizontalLayout: 'default',
+  verticalLayout: 'default',
+  width: 60,
+  whitespaceBreak: true
+}));
+
+header = _.filter(header);
+
+const message = `${ header.join('') }
+${ chalk.underline("Just like that, we are ready!") }
+
+Site URL: ${ chalk.dim(`https://${ process.env.DOMAIN_NAME }`) }
+Site Admin: ${ chalk.dim(`https://${ process.env.DOMAIN_NAME }/wp-admin`) }
+Credentials: ${ chalk.dim("admin / admin") }
+
+Sub-domains registered and with SSL:
+${ chalk.dim(formatDomains(process.env.ADDITIONAL_DOMAIN_NAMES)) }
+
+Mapped domains registered and with SSL:
+${ chalk.dim(formatDomains(process.env.MAPPED_DOMAIN_NAMES)) }
+
+To shut this site down, use:
+${ chalk.dim("$ npx @next-press/caesar down " + process.env.DOMAIN_NAME )}
+
+To shut all sites, run:
+${ chalk.dim("$ npx @next-press/caesar down") }`;
+
+console.log(boxt(message, {
+  theme: 'round',
+  padding: 3,
+  align: 'left',
+  minWidth: 70
+}));
