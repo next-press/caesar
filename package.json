@@ -1,6 +1,6 @@
 {
   "name": "@next-press/caesar",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "NextPress docker-based development environment",
   "main": "index.js",
   "bin": "caesar",
