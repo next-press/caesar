@@ -110,7 +110,7 @@ export COMPOSE_PROJECT_NAME="caesar-$THE_SLUG"
 
 COMPOSER_CUSTOM_FILE=$CWD_PATH/docker-compose.override.yaml
 CUSTOM_COMPOSER_FILE_CMD=""
-if test -f "$FILE"; then
+if test -f "$COMPOSER_CUSTOM_FILE"; then
   CUSTOM_COMPOSER_FILE_CMD="-f ${COMPOSER_CUSTOM_FILE}"
 fi
 
