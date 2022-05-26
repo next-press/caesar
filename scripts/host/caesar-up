@@ -93,8 +93,6 @@ bash ${LIB_PATH}/scripts/host/caesar-install $1
 
 export COMPOSE_IGNORE_ORPHANS=True
 
-docker network ls | grep -q "caesar_site_$THE_SLUG" || docker network create -d bridge "caesar_site_$THE_SLUG" --label co.nextpress.caesar > /dev/null 2>&1
-
 export COMPOSE_PROJECT_NAME=caesar
 
 echo ""
@@ -110,8 +108,15 @@ start_spinner "Loading site container..."
 
 export COMPOSE_PROJECT_NAME="caesar-$THE_SLUG"
 
+COMPOSER_CUSTOM_FILE=$CWD_PATH/docker-compose.override.yaml
+CUSTOM_COMPOSER_FILE_CMD=""
+if test -f "$FILE"; then
+  CUSTOM_COMPOSER_FILE_CMD="-f ${COMPOSER_CUSTOM_FILE}"
+fi
+
 docker compose \
   -f ${LIB_PATH}/docker-compose.yaml \
+  ${CUSTOM_COMPOSER_FILE_CMD} \
   up -d --build > "$CAESAR_LOG_FILE" 2>&1
   # --build
 
@@ -200,7 +205,7 @@ mkdir ~/Documents/root-ca 2> /dev/null
   ## You copy your mkcert keys from your docker container to your localhost
   docker cp "caesar-$THE_SLUG-cert:/root/.local/share/mkcert" ~/Documents/root-ca > /dev/null 2>&1
 
-  start_spinner "Remvoing the cert-issuing container. Thanks, mkcert!"
+  start_spinner "Removing the cert-issuing container. Thanks, mkcert!"
 
   docker container rm $(docker container ls -q --filter "status=exited" --filter "name=caesar-$THE_SLUG-cert") > /dev/null 2>&1
 

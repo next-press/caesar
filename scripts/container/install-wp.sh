@@ -75,11 +75,16 @@ function tap_wp_config {
 
   fi
 
+  rm /var/www/html/wp-content/plugins/index.php
+  rm /var/www/html/wp-content/plugins/hello.php
+  rm -rf /var/www/html/wp-content/plugins/akismet
+
   wp plugin install query-monitor \
     --allow-root \
     --activate-network
     
   wp plugin install debug-bar-slow-actions \
-    --allow-root
+    --allow-root \
+    --activate-network
 
 } &> /var/www/html/install.log
