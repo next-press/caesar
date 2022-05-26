@@ -36,6 +36,7 @@ services:
   wordpress:
     image: nextpress/caesar-wordpress:latest
     container_name: caesar-${SLUG}-wordpress
+    user: ${UID:-1000}:${GID:-1000}
     depends_on:
       - caesar-${SLUG}-db
       - caesar-${SLUG}-cert
