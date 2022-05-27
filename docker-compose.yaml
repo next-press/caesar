@@ -5,22 +5,24 @@ networks:
     external: true
     name: caesar_supervisor
   caesar_site:
-    external: true
     name: caesar_site_${SLUG}
+
+volumes:
+  wordpress:
+  database:
 
 services:
   # ---------------
   # MariaDB for the site install
-  # - THe Database
+  # - The Database
   # ---------------
   db:
     image: yobasystems/alpine-mariadb
     container_name: caesar-${SLUG}-db
     volumes:
-      - ~/.caesar/db/${SLUG}:/var/lib/mysql
-    restart: always
+      - database:/var/lib/mysql
+    restart: unless-stopped
     networks:
-      - caesar_supervisor
       - caesar_site
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -34,6 +36,7 @@ services:
   wordpress:
     image: nextpress/caesar-wordpress:latest
     container_name: caesar-${SLUG}-wordpress
+    user: ${UID:-1000}:${GID:-1000}
     depends_on:
       - caesar-${SLUG}-db
       - caesar-${SLUG}-cert
@@ -41,26 +44,18 @@ services:
       - caesar_supervisor
       - caesar_site
     volumes:
-      - $CWD_PATH/wp:/var/www/html
+      - wordpress:/var/www/html
       - $LIB_PATH/mu-plugins/autoloader.php:/var/www/html/wp-content/mu-plugins/autoloader.php:ro
       - $LIB_PATH/mu-plugins/info.php:/var/www/html/wp-content/mu-plugins/info.php:ro
       - $LIB_PATH/scripts/container:/scripts
       # - $LIB_PATH/htaccess/.htaccess-single:/var/www/html/.htaccess-single
       # - $LIB_PATH/htaccess/.htaccess-subdir:/var/www/html/.htaccess-subdir
       # - $LIB_PATH/htaccess/.htaccess-subdomain:/var/www/html/.htaccess-subdomain
-      - $CWD_PATH/wp-content/plugins:/var/www/html/wp-content/plugins
-      - $CWD_PATH/wp-content/themes:/var/www/html/wp-content/themes
-      - $CWD_PATH/wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins/files
+      - $CWD_PATH/plugins:/var/www/html/wp-content/plugins
+      - $CWD_PATH/themes:/var/www/html/wp-content/themes
+      - $CWD_PATH/mu-plugins:/var/www/html/wp-content/mu-plugins/files
       - $CWD_PATH/logs/xdebug:/logs/xdebug
-
-      # Running Marker
-      # Out Products
-      - $CWD_PATH/wp-ultimo:/var/www/html/wp-content/plugins/wp-ultimo
-      
-      # - $CWD_PATH/wp-admin-pages-pro:/var/www/html/wp-content/plugins/wp-admin-pages-pro
-      # - $CWD_PATH/material-wp:/var/www/html/wp-content/plugins/material-wp
-      # - $CWD_PATH/pro-theme:/var/www/html/wp-content/plugins/pro-theme
-    restart: always
+    restart: unless-stopped
     environment:
       WORDPRESS_DB_HOST: caesar-${SLUG}-db
       WORDPRESS_DB_USER: wp
@@ -77,7 +72,6 @@ services:
     container_name: caesar-${SLUG}-cert
     networks:
       - caesar_supervisor
-      - caesar_site
     environment:
       DOMAIN: ${DOMAIN_NAME},${ADDITIONAL_DOMAIN_NAMES},${MAPPED_DOMAIN_NAMES}
     volumes:

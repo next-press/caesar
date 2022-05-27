@@ -9,9 +9,8 @@
       "log": true,
       "stopOnEntry": true,
       "pathMappings": {
-        "/var/www/html": "${workspaceRoot}/wp",
-        "/var/www/html/wp-content": "${workspaceRoot}/wp-content",
-        "/var/www/html/wp-content/plugins/wp-ultimo": "${workspaceRoot}/wp-ultimo",
+        "/var/www/html/wp-content": "${workspaceRoot}",
+        "/var/www/html/wp-content/mu-plugins/files": "${workspaceRoot}/mu-plugins/files"
       }
     }
   ]
