@@ -7,7 +7,6 @@
       "request": "launch",
       "port": 9003,
       "log": true,
-      "stopOnEntry": true,
       "pathMappings": {
         "/var/www/html": "${workspaceRoot}/wp",
         "/var/www/html/wp-content": "${workspaceRoot}/wp-content",
